@@ -16,8 +16,20 @@
     "prepublish": "npm run lint && npm t && npm run build",
     "precommit": "lint-staged"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/node": "^8.0.8",
+    "babel-core": "^6.25.0",
+    "babel-plugin-jsx": "^1.2.0",
+    "babel-plugin-syntax-jsx": "^6.18.0",
+    "babel-traverse": "^6.25.0",
+    "babel-types": "^6.25.0",
+    "babylon": "^6.17.4",
+    "ivi": "^0.7.0",
+    "vdom-utils": "^0.2.1"
+  },
   "devDependencies": {
+    "@types/babel-core": "^6.7.14",
+    "@types/babel-types": "^6.7.16",
     "@types/chai": "^4.0.1",
     "@types/mocha": "^2.2.41",
     "chai": "^4.0.2",
