@@ -7,8 +7,20 @@ import traverse from "babel-traverse";
 /* tslint:disable:no-bitwise no-var-requires */
 const jsx = require("babel-plugin-syntax-jsx");
 
+export interface Options {
+  imports: boolean;
+}
+
 const visitor = {
-  JSXElement(path: any) {
+  JSXElement(path: any, state: any) {
+    const opts = state.opts;
+    if (!opts.pragmaIncluded && !path.scope.hasBinding("VNode")) {
+      opts.pragmaIncluded = true;
+
+      const program = getProgram(path);
+      createImports(t, program.node, opts);
+    }
+
     const open = path.node.openingElement;
     const name = open.name.name;
 
@@ -36,6 +48,10 @@ const visitor = {
     path.replaceWith(text);
   },
 };
+
+export function getProgram(path: any) {
+  return path.findParent((path2: any) => path2.isProgram());
+}
 
 export default function convert(babel: any) {
   const t = babel.types;
@@ -172,5 +188,18 @@ export function getAttributes(t: any, attrs: any[] | null) {
       props: {},
       className: null,
     },
+  );
+}
+
+export function createImports(t: any, node: any, opts: Options) {
+  if (node.body === undefined) {
+    node.body = [];
+  }
+
+  return node.body.unshift(
+    t.importDeclaration(
+      [t.ImportSpecifier(t.identifier("VNode"), t.identifier("VNode"))],
+      t.stringLiteral(typeof opts.imports === "string" ? opts.imports : "ivi"),
+    ),
   );
 }
