@@ -21,7 +21,14 @@ export default function convert(babel: any) {
         const props = Object.keys(attrs.props).length > 0 ? attrs.props : null;
 
         path.replaceWith(
-          buildExpression(t, flags, name, props, attrs.className, null),
+          buildExpression(
+            t,
+            flags,
+            name,
+            props,
+            attrs.className,
+            path.node.children,
+          ),
         );
       },
     },
@@ -42,7 +49,11 @@ export function buildExpression(
     ? t.nullLiteral()
     : t.stringLiteral(className);
 
-  const propExp = props === null ? t.nullLiteral() : props;
+  let propExp = t.nullLiteral();
+  if (props !== null) {
+    propExp = objToExpression(t, props);
+  }
+
   const childrenExp = t.nullLiteral();
 
   return t.newExpression(t.identifier("VNode"), [
@@ -52,6 +63,36 @@ export function buildExpression(
     classExp,
     childrenExp,
   ]);
+}
+
+export function objToExpression(t: any, obj: any) {
+  const keys = Object.keys(obj);
+  return t.ObjectExpression(
+    keys.map(key => {
+      const name = getName(t, key);
+      const value = getValue(t, obj[key]);
+      return t.ObjectProperty(name, value);
+    }),
+  );
+}
+
+export function getName(t: any, name: string) {
+  if (name.indexOf("-") > -1) {
+    return t.StringLiteral(name);
+  }
+  return t.identifier(name);
+}
+
+function getValue(t: any, value: any) {
+  if (!value) {
+    return t.BooleanLiteral(true);
+  }
+
+  if (t.isJSXExpressionContainer(value)) {
+    return value.expression;
+  }
+
+  return t.stringLiteral(value);
 }
 
 export function getFlags(t: any, name: string) {
@@ -83,7 +124,7 @@ export function getAttributes(t: any, attrs: any[]) {
       const value = item.value.value;
 
       if (name === "class" || name === "className") {
-        obj.props.className = value;
+        obj.className = value;
       } else {
         obj.props[name] = value;
       }
