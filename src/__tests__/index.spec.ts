@@ -22,7 +22,7 @@ function run() {
   tests.forEach(test => {
     it("should work for " + test.name, () => {
       const { code } = babel.transform(test.source, { plugins: [plugin] });
-      t.equal(code, test.result);
+      t.equal(code, test.result.trim());
     });
   });
 }
