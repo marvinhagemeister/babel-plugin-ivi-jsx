@@ -1,0 +1,9 @@
+import { VNode } from "ivi";
+
+function Foo() {
+  return new VNode(2, "div", {
+    "data-foo": "baz"
+  }, "bar",
+    new VNode(2, "input", { disabled: true }, null, null),
+  );
+}

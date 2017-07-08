@@ -10,7 +10,7 @@
     "lint": "tslint 'src/**/*.ts' 'src/**/*.tsx'",
     "watch": "tsc -w",
     "build": "npm run cleanup && tsc",
-    "test": "mocha --compilers ts:ts-node/register 'src/**/__tests__/*.spec.ts'",
+    "test": "mocha --watch-extensions txt --compilers ts:ts-node/register 'src/**/__tests__/*.spec.ts'",
     "test-watch": "npm t -- -w -R min",
     "coverage": "nyc npm t",
     "prepublish": "npm run lint && npm t && npm run build",
@@ -36,6 +36,7 @@
     "husky": "^0.14.2",
     "lint-staged": "^4.0.0",
     "mocha": "^3.3.0",
+    "nicer-fs": "^1.1.1",
     "nyc": "^11.0.3",
     "prettier": "^1.4.4",
     "rimraf": "^2.6.1",
@@ -52,10 +53,7 @@
     ]
   },
   "nyc": {
-    "include": [
-      "src/*.ts",
-      "src/**/*.ts"
-    ],
+    "include": ["src/*.ts", "src/**/*.ts"],
     "exclude": [
       "typings",
       "node_modules/",
@@ -63,19 +61,9 @@
       "__tests__/**",
       "**/*.d.ts"
     ],
-    "extension": [
-      ".ts"
-    ],
-    "require": [
-      "ts-node/register"
-    ],
-    "reporter": [
-      "json",
-      "html",
-      "text",
-      "text-summary",
-      "lcovonly"
-    ],
+    "extension": [".ts"],
+    "require": ["ts-node/register"],
+    "reporter": ["json", "html", "text", "text-summary", "lcovonly"],
     "all": true
   }
 }
