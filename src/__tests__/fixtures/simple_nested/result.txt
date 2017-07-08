@@ -1,0 +1,7 @@
+import { VNode } from "ivi";
+
+function Foo() {
+  return new VNode(2, "div", null, null,
+    new VNode(2, "span", null, null, "foo"),
+  );
+}
