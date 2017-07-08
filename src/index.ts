@@ -7,31 +7,41 @@ import traverse from "babel-traverse";
 /* tslint:disable:no-bitwise no-var-requires */
 const jsx = require("babel-plugin-syntax-jsx");
 
+const visitor = {
+  JSXElement(path: any) {
+    const open = path.node.openingElement;
+    const name = open.name.name;
+
+    const flags = getFlags(t, name);
+    const attrs = getAttributes(t, open.attributes);
+    const props = Object.keys(attrs.props).length > 0 ? attrs.props : null;
+
+    path.node.children = (t as any).react.buildChildren(path.node);
+
+    const callExpr = buildExpression(
+      t,
+      flags,
+      name,
+      props,
+      attrs.className,
+      path.node.children,
+    );
+
+    path.replaceWith((t as any).inherits(callExpr, path.node));
+  },
+  JSXText(path: any) {
+    const text = path.node === null
+      ? t.nullLiteral()
+      : t.stringLiteral(path.node.value);
+    path.replaceWith(text);
+  },
+};
+
 export default function convert(babel: any) {
   const t = babel.types;
 
   return {
-    visitor: {
-      JSXElement(path: any) {
-        const open = path.node.openingElement;
-        const name = open.name.name;
-
-        const flags = getFlags(t, name);
-        const attrs = getAttributes(t, open.attributes);
-        const props = Object.keys(attrs.props).length > 0 ? attrs.props : null;
-
-        path.replaceWith(
-          buildExpression(
-            t,
-            flags,
-            name,
-            props,
-            attrs.className,
-            path.node.children,
-          ),
-        );
-      },
-    },
+    visitor,
     inherits: jsx,
   };
 }
@@ -54,7 +64,27 @@ export function buildExpression(
     propExp = objToExpression(t, props);
   }
 
-  const childrenExp = t.nullLiteral();
+  let childrenExp = t.nullLiteral();
+  if (children !== null) {
+    if (Array.isArray(children)) {
+      const filtered = children
+        .map(node => {
+          if (node.value !== undefined) {
+            node.value = node.value.replace(/\n\s+/g, "\n");
+          }
+
+          return node;
+        })
+        .filter(node => node.value !== "\n");
+      if (filtered.length === 1) {
+        childrenExp = filtered[0];
+      } else if (filtered.length > 1) {
+        childrenExp = filtered;
+      }
+    } else {
+      childrenExp = t.stringLiteral(children);
+    }
+  }
 
   return t.newExpression(t.identifier("VNode"), [
     t.numericLiteral(flags),
@@ -117,11 +147,18 @@ export function getFlags(t: any, name: string) {
   throw new Error("Not implemented");
 }
 
-export function getAttributes(t: any, attrs: any[]) {
+export function getAttributes(t: any, attrs: any[] | null) {
+  if (attrs === null) {
+    return {
+      props: null,
+      className: null,
+    };
+  }
+
   return attrs.reduce(
     (obj, item) => {
       const name = item.name.name;
-      const value = item.value.value;
+      const value = item.value === null ? null : item.value.value;
 
       if (name === "class" || name === "className") {
         obj.className = value;
