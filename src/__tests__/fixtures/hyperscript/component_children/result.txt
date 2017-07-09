@@ -1,0 +1,11 @@
+import * as h from "ivi-html";
+export function Text() {
+  return h.div().children(Heading({
+    text: "foo",
+    children: "Hello World"
+  }), h.p().children("Lorem Ipsum"));
+}
+
+export function Heading(props) {
+  return h.h1().children(props.text, " - ", props.children);
+}

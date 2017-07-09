@@ -1,16 +1,14 @@
 import { assert as t } from "chai";
 import * as path from "path";
 import * as babel from "babel-core";
-import { readDir, readFile } from "nicer-fs";
 import * as fs from "fs";
-import plugin from "../";
 
-function run() {
-  const root = path.join(__dirname, "fixtures");
+export function run(fixtureFolder: string, plugin: any) {
+  const root = path.join(__dirname, "fixtures", fixtureFolder);
   const dirs = fs.readdirSync(root);
 
   const tests = dirs.map(name => {
-    const source = fs.readFileSync(path.join(root, name, "source.tsx"), "utf8");
+    const source = fs.readFileSync(path.join(root, name, "source.jsx"), "utf8");
     const result = fs.readFileSync(path.join(root, name, "result.txt"), "utf8");
     return {
       name,
@@ -26,7 +24,3 @@ function run() {
     });
   });
 }
-
-describe("Replace JSX with VNodes", () => {
-  run();
-});
