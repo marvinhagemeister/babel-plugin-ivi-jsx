@@ -1,5 +1,0 @@
-import { VNode } from "ivi";
-
-function Foo() {
-  return new VNode(2, "div", null, null, "foo");
-}

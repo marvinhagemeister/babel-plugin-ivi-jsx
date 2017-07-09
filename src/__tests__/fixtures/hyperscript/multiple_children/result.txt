@@ -1,0 +1,4 @@
+import * as h from "ivi-html";
+export function Text() {
+  return h.div().children(h.h1().children("Hello World"), h.p().children("Lorem Ipsum"));
+}

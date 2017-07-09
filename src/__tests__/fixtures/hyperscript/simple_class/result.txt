@@ -1,0 +1,9 @@
+import { onClick } from "ivi-events";
+import * as h from "ivi-html";
+const noop2 = () => {
+  /* noop */
+};
+
+function Foo() {
+  return h.div("foo").events(onClick(noop2)).children("Hello World");
+}
