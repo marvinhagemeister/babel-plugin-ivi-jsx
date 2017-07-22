@@ -7,7 +7,6 @@ export function isComponentCall(node: t.JSXOpeningElement): boolean {
 }
 
 export interface Options {
-  imports: string;
   primitiveProps: boolean;
   _pragmaIncluded: boolean;
 }
