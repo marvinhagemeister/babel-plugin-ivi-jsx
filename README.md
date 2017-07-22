@@ -47,6 +47,22 @@ function Foo(props) {
 }
 ```
 
+### Usage with TypeScript
+
+Since `babel-plugin-ivi-jsx` is not required explicitely in your code your
+editor will not load the types automatically. This is solved by simply adding
+`jsx.d.ts` to your `tsconfig.json` to have a fully typed programming experience.
+
+```json
+{
+  "compilerOptions": {...},
+  "files": [
+    "node_modules/babel-plugin-ivi-jsx/jsx.d.ts", // <- Add this
+    "path/to/your/entry.ts"
+  ]
+}
+```
+
 ### For React users
 
 Since most people dealing with `jsx` come from the react world, this plugin eases the transition by allowing react-specific attributes:
