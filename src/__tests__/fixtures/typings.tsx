@@ -1,3 +1,5 @@
+import "../../../index.d";
+
 export interface Props {
   text: string;
 }
