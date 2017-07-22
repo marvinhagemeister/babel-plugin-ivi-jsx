@@ -3,7 +3,7 @@
   "version": "1.0.3",
   "description": "Babel plugin to compile ivi jsx",
   "main": "dist/index.js",
-  "types": "index.d.ts",
+  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git@github.com:marvinhagemeister/babel-plugin-ivi-jsx.git"
@@ -21,6 +21,14 @@
     "prepublishOnly": "npm run lint && npm t && npm run build",
     "precommit": "lint-staged"
   },
+  "peerDependencies": {
+    "ivi": "^0.8.0",
+    "ivi-core": "^0.1.0",
+    "ivi-dom": "^0.1.0",
+    "ivi-events": "^0.1.0",
+    "ivi-html": "^0.1.0",
+    "ivi-scheduler": "^0.1.0"
+  },
   "dependencies": {
     "@types/babel-generator": "^6.25.0",
     "@types/node": "^8.0.14",
@@ -29,13 +37,7 @@
     "babel-plugin-syntax-jsx": "^6.18.0",
     "babel-traverse": "^6.25.0",
     "babel-types": "^6.25.0",
-    "babylon": "^6.17.4",
-    "ivi": "^0.8.0",
-    "ivi-core": "^0.1.0",
-    "ivi-dom": "^0.1.0",
-    "ivi-events": "^0.1.0",
-    "ivi-html": "^0.1.0",
-    "ivi-scheduler": "^0.1.0"
+    "babylon": "^6.17.4"
   },
   "devDependencies": {
     "@types/babel-core": "^6.7.15",
@@ -44,6 +46,12 @@
     "@types/mocha": "^2.2.41",
     "chai": "^4.1.0",
     "husky": "^0.14.3",
+    "ivi": "^0.8.0",
+    "ivi-core": "^0.1.0",
+    "ivi-dom": "^0.1.0",
+    "ivi-events": "^0.1.0",
+    "ivi-html": "^0.1.0",
+    "ivi-scheduler": "^0.1.0",
     "lint-staged": "^4.0.2",
     "mocha": "^3.3.0",
     "nyc": "^11.0.3",
