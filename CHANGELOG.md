@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- Support ES5 require (like `<Foo.default />`)
+
 ## 1.0.1
 
 - Fix `undefined index.d` import error
