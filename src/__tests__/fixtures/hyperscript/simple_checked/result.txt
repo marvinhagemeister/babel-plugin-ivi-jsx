@@ -1,0 +1,6 @@
+import * as h from "ivi-html";
+function FooBar() {
+  return h.input().props({
+    type: "checkbox"
+  }).checked(true);
+}
