@@ -1,4 +1,3 @@
-import * as jsx from "babel-plugin-syntax-jsx";
 import { NodePath } from "babel-traverse";
 import * as t from "babel-types";
 import {
@@ -11,6 +10,9 @@ import {
 import { buildImport, wildCardImport } from "./templates";
 import { objToAst, toAst } from "./convert";
 import { isPrimitiveProp } from "./optimizations";
+
+/* tslint:disable:no-var-requires */
+const jsx = require("babel-plugin-syntax-jsx");
 
 export default function convert(babel: any) {
   return {
@@ -54,7 +56,14 @@ export const visitor = {
     const binding = path.scope.getBinding(name);
 
     const result = !isComponentCall(open)
-      ? hyperscript(name, attrs.className, attrs.props, attrs.events, children)
+      ? hyperscript(
+          name,
+          attrs.className,
+          attrs.key,
+          attrs.props,
+          attrs.events,
+          children,
+        )
       : hyperscriptComponent(name, attrs.props, children, binding);
 
     path.replaceWith(result);
@@ -69,6 +78,7 @@ export const visitor = {
 export function hyperscript(
   tag: string,
   className: string | null,
+  key: null | string,
   props: null | Record<string, any>,
   events: null | Record<string, any>,
   children: null | any,
@@ -84,9 +94,15 @@ export function hyperscript(
     ]);
   }
 
+  if (key !== null) {
+    ast = t.callExpression(t.memberExpression(ast, t.identifier("key")), [
+      t.stringLiteral(key),
+    ]);
+  }
+
   if (events !== null) {
-    const eventExp = Object.keys(events).map(key =>
-      t.callExpression(t.identifier(key), [events[key]]),
+    const eventExp = Object.keys(events).map(name =>
+      t.callExpression(t.identifier(name), [events[name]]),
     );
 
     ast = t.callExpression(
