@@ -63,6 +63,8 @@ export const visitor = {
           attrs.props,
           attrs.style,
           attrs.events,
+          attrs.value,
+          attrs.checked,
           attrs.unsafeHTML,
           children,
         )
@@ -84,6 +86,8 @@ export function hyperscript(
   props: null | Record<string, any>,
   style: null | t.ObjectExpression,
   events: null | Record<string, any>,
+  value: null | t.StringLiteral | t.NumericLiteral,
+  checked: null | boolean,
   unsafeHTML: null | string,
   children: null | any,
 ) {
@@ -110,6 +114,18 @@ export function hyperscript(
     ]);
   }
 
+  if (value !== null) {
+    ast = t.callExpression(t.memberExpression(ast, t.identifier("value")), [
+      toAst(value),
+    ]);
+  }
+
+  if (checked !== null) {
+    ast = t.callExpression(t.memberExpression(ast, t.identifier("checked")), [
+      t.booleanLiteral(checked),
+    ]);
+  }
+
   let hasUnsafe = false;
   if (unsafeHTML !== null) {
     hasUnsafe = true;
@@ -130,7 +146,11 @@ export function hyperscript(
     );
   }
 
-  if (children !== null && !hasUnsafe) {
+  if (
+    children !== null &&
+    !hasUnsafe &&
+    (Array.isArray(children) && children.length > 0)
+  ) {
     ast = t.callExpression(
       t.memberExpression(ast, t.identifier("children")),
       children,

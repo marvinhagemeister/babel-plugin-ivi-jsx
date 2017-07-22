@@ -1,0 +1,4 @@
+import * as h from "ivi-html";
+function Foo() {
+  return h.div();
+}

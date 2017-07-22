@@ -31,6 +31,8 @@ export interface Attributes {
   className: null | string;
   style: null | t.ObjectExpression;
   unsafeHTML: null | string;
+  checked: null | boolean;
+  value: null | t.NumericLiteral | t.StringLiteral;
 }
 
 export function getAttributes(
@@ -46,11 +48,13 @@ export function getAttributes(
       className: null,
       style: null,
       unsafeHTML: null,
+      value: null,
+      checked: null,
     };
   }
 
   return attrs.reduce(
-    (obj, item) => {
+    (obj: Attributes, item) => {
       const name = item.name.name;
 
       /* tslint:disable:prefer-conditional-expression */
@@ -62,22 +66,33 @@ export function getAttributes(
           value = item.value.expression.value;
         }
       } else {
-        value = item.value.value;
+        if (t.isJSXIdentifier(item.name, { name: "checked" })) {
+          value = item.value !== null || item.value !== false;
+        } else {
+          value = item.value.value;
+        }
       }
 
-      if (name === "class" || name === "className") {
+      if (name === "key") {
+        obj.key = value;
+      } else if (!isComponent && (name === "class" || name === "className")) {
         obj.className = value;
       } else if (!isComponent && name.startsWith("on")) {
         if (obj.events === null) {
           obj.events = {};
         }
         obj.events[name] = item.value.expression;
-      } else if (name === "key") {
-        obj.key = value;
-      } else if (name === "style") {
+      } else if (!isComponent && name === "style") {
         obj.style = value;
-      } else if (name === "unsafeHTML" || name === "dangerouslySetInnerHTML") {
+      } else if (
+        !isComponent &&
+        (name === "unsafeHTML" || name === "dangerouslySetInnerHTML")
+      ) {
         obj.unsafeHTML = value;
+      } else if (!isComponent && name === "value") {
+        obj.value = value;
+      } else if (!isComponent && name === "checked") {
+        obj.checked = value;
       } else {
         if (obj.props === null) {
           obj.props = {};
@@ -95,6 +110,8 @@ export function getAttributes(
       className: null,
       style: null,
       unsafeHTML: null,
+      value: null,
+      checked: null,
     },
   );
 }
