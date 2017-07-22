@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Babel plugin to compile ivi jsx",
   "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "types": "index.d.ts",
   "repository": {
     "type": "git",
     "url": "git@github.com:marvinhagemeister/babel-plugin-ivi-jsx.git"

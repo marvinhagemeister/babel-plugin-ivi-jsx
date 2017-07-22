@@ -11,5 +11,5 @@
     "jsx": "preserve"
   },
   "exclude": ["node_modules", "**/__tests__/"],
-  "files": ["src/index.d.ts", "src/index.ts"]
+  "files": ["src/index.ts"]
 }
