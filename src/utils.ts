@@ -2,7 +2,20 @@ import * as t from "babel-types";
 import { NodePath } from "babel-traverse";
 
 export function isComponentCall(node: t.JSXOpeningElement): boolean {
-  const name = t.isJSXIdentifier(node.name) ? node.name.name : "";
+  let name = "";
+  if (t.isJSXIdentifier(node.name)) {
+    name = node.name.name;
+  } else if (t.isJSXMemberExpression(node.name)) {
+    if (
+      t.isJSXIdentifier(node.name.object) &&
+      t.isJSXIdentifier(node.name.property)
+    ) {
+      name = node.name.object.name + "." + node.name.property.name;
+    } else {
+      throw new Error("Unknown node: " + JSON.stringify(node.name, null, 2));
+    }
+  }
+
   return name.length > 0 && name.charAt(0) === name.charAt(0).toUpperCase();
 }
 

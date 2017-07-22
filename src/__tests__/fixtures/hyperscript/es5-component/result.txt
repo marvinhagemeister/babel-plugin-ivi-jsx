@@ -1,0 +1,12 @@
+"use strict";
+
+import * as h from "ivi-html";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Foo_1 = require("./Foo");
+function App() {
+  return h.div().children(Foo_1.default({
+    text: "foo",
+    children: "content"
+  }));
+}
+exports.default = App;
