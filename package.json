@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-ivi-jsx",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Babel plugin to compile ivi jsx",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

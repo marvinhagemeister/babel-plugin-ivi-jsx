@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4
+
+- Refactor jsx typings
+- Add `using with TypeScript` section to readme
+
 ## 1.0.3
 
 - Fix more ES5 interop issues
