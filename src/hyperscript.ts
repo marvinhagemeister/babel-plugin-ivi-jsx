@@ -61,6 +61,7 @@ export const visitor = {
           attrs.className,
           attrs.key,
           attrs.props,
+          attrs.style,
           attrs.events,
           children,
         )
@@ -80,6 +81,7 @@ export function hyperscript(
   className: string | null,
   key: null | string,
   props: null | Record<string, any>,
+  style: null | t.ObjectExpression,
   events: null | Record<string, any>,
   children: null | any,
 ) {
@@ -88,15 +90,21 @@ export function hyperscript(
     className !== null ? [t.stringLiteral(className)] : [],
   );
 
+  if (key !== null) {
+    ast = t.callExpression(t.memberExpression(ast, t.identifier("key")), [
+      t.stringLiteral(key),
+    ]);
+  }
+
   if (props !== null) {
     ast = t.callExpression(t.memberExpression(ast, t.identifier("props")), [
       objToAst(props),
     ]);
   }
 
-  if (key !== null) {
-    ast = t.callExpression(t.memberExpression(ast, t.identifier("key")), [
-      t.stringLiteral(key),
+  if (style !== null) {
+    ast = t.callExpression(t.memberExpression(ast, t.identifier("style")), [
+      style,
     ]);
   }
 
