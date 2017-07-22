@@ -50,8 +50,19 @@ export const visitor = {
     // Children
     const children = t.react.buildChildren(path.node) as any;
 
-    open.name = open.name as t.JSXIdentifier;
-    const name = open.name.name;
+    open.name = open.name;
+    let name: string = "";
+    if (t.isJSXIdentifier(open.name)) {
+      name = open.name.name;
+    } else if (t.isJSXMemberExpression(open.name)) {
+      if (t.isJSXIdentifier(open.name.object)) {
+        name = open.name.object.name + "." + open.name.property.name;
+      } else {
+        throw new Error(
+          "Unsupported node: " + JSON.stringify(open.name, null, 2),
+        );
+      }
+    }
 
     const binding = path.scope.getBinding(name);
 
@@ -140,10 +151,12 @@ export function hyperscript(
       t.callExpression(t.identifier(name), [events[name]]),
     );
 
-    ast = t.callExpression(
-      t.memberExpression(ast, t.identifier("events")),
-      eventExp.length > 1 ? [t.arrayExpression(eventExp)] : [eventExp[0]],
-    );
+    if (eventExp.length > 0) {
+      ast = t.callExpression(
+        t.memberExpression(ast, t.identifier("events")),
+        eventExp.length > 1 ? [t.arrayExpression(eventExp)] : [eventExp[0]],
+      );
+    }
   }
 
   if (
@@ -174,7 +187,8 @@ export function hyperscriptComponent(
     | t.NullLiteral
     | t.ArrayExpression = objToAst(props);
 
-  const childAst = children.length === 1 ? children[0] : children;
+  const childAst =
+    children !== null && children.length === 1 ? children[0] : children;
 
   const keys = Object.keys(props);
   if (
@@ -183,7 +197,7 @@ export function hyperscriptComponent(
     isPrimitiveProp(binding, keys[0])
   ) {
     propExp = toAst(props[keys[0]]);
-  } else if (children.length > 0) {
+  } else if (children !== null && children.length > 0) {
     propExp.properties.push(
       t.objectProperty(t.identifier("children"), childAst),
     );
