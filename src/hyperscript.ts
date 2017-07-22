@@ -63,6 +63,7 @@ export const visitor = {
           attrs.props,
           attrs.style,
           attrs.events,
+          attrs.unsafeHTML,
           children,
         )
       : hyperscriptComponent(name, attrs.props, children, binding);
@@ -83,6 +84,7 @@ export function hyperscript(
   props: null | Record<string, any>,
   style: null | t.ObjectExpression,
   events: null | Record<string, any>,
+  unsafeHTML: null | string,
   children: null | any,
 ) {
   let ast = t.callExpression(
@@ -108,6 +110,15 @@ export function hyperscript(
     ]);
   }
 
+  let hasUnsafe = false;
+  if (unsafeHTML !== null) {
+    hasUnsafe = true;
+    ast = t.callExpression(
+      t.memberExpression(ast, t.identifier("unsafeHTML")),
+      [t.stringLiteral(unsafeHTML)],
+    );
+  }
+
   if (events !== null) {
     const eventExp = Object.keys(events).map(name =>
       t.callExpression(t.identifier(name), [events[name]]),
@@ -119,7 +130,7 @@ export function hyperscript(
     );
   }
 
-  if (children !== null) {
+  if (children !== null && !hasUnsafe) {
     ast = t.callExpression(
       t.memberExpression(ast, t.identifier("children")),
       children,

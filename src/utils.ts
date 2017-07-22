@@ -30,6 +30,7 @@ export interface Attributes {
   props: null | Record<string, any>;
   className: null | string;
   style: null | t.ObjectExpression;
+  unsafeHTML: null | string;
 }
 
 export function getAttributes(
@@ -44,6 +45,7 @@ export function getAttributes(
       props: null,
       className: null,
       style: null,
+      unsafeHTML: null,
     };
   }
 
@@ -74,6 +76,8 @@ export function getAttributes(
         obj.key = value;
       } else if (name === "style") {
         obj.style = value;
+      } else if (name === "unsafeHTML" || name === "dangerouslySetInnerHTML") {
+        obj.unsafeHTML = value;
       } else {
         if (obj.props === null) {
           obj.props = {};
@@ -90,6 +94,7 @@ export function getAttributes(
       props: null,
       className: null,
       style: null,
+      unsafeHTML: null,
     },
   );
 }
