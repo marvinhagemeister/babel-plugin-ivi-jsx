@@ -1,0 +1,4 @@
+import * as h from "ivi-html";
+function FooBar() {
+  return h.div().unsafeHTML("<h1>Sample</h1>");
+}
