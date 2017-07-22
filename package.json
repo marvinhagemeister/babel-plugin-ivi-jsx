@@ -1,12 +1,12 @@
 {
-  "name": "babel-plugin-ivi",
-  "version": "0.0.1",
+  "name": "babel-plugin-ivi-jsx",
+  "version": "1.0.0",
   "description": "Babel plugin to compile ivi jsx",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git@github.com:marvinhagemeister/babel-plugin-ivi.git"
+    "url": "git@github.com:marvinhagemeister/babel-plugin-ivi-jsx.git"
   },
   "author": "Marvin Hagemeister <marvin@marvinhagemeister.de>",
   "license": "MIT",
@@ -62,10 +62,7 @@
     ]
   },
   "nyc": {
-    "include": [
-      "src/*.ts",
-      "src/**/*.ts"
-    ],
+    "include": ["src/*.ts", "src/**/*.ts"],
     "exclude": [
       "typings",
       "node_modules/",
@@ -73,19 +70,9 @@
       "__tests__/**",
       "**/*.d.ts"
     ],
-    "extension": [
-      ".ts"
-    ],
-    "require": [
-      "ts-node/register"
-    ],
-    "reporter": [
-      "json",
-      "html",
-      "text",
-      "text-summary",
-      "lcovonly"
-    ],
+    "extension": [".ts"],
+    "require": ["ts-node/register"],
+    "reporter": ["json", "html", "text", "text-summary", "lcovonly"],
     "all": true
   }
 }
