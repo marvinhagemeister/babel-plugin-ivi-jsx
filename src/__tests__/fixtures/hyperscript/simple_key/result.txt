@@ -1,6 +1,6 @@
 import * as h from "ivi-html";
 function FooBar() {
-  return h.div().props({
+  return h.div().key("bar").props({
     id: "foo"
-  }).key("bar").children("Hello World");
+  }).children("Hello World");
 }

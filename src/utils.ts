@@ -29,6 +29,7 @@ export interface Attributes {
   events: null | Record<string, (ev: any) => void>;
   props: null | Record<string, any>;
   className: null | string;
+  style: null | t.ObjectExpression;
 }
 
 export function getAttributes(
@@ -42,6 +43,7 @@ export function getAttributes(
       events: null,
       props: null,
       className: null,
+      style: null,
     };
   }
 
@@ -49,9 +51,17 @@ export function getAttributes(
     (obj, item) => {
       const name = item.name.name;
 
-      const value = t.isJSXExpressionContainer(item.value)
-        ? item.value.expression.value
-        : item.value.value;
+      /* tslint:disable:prefer-conditional-expression */
+      let value: any;
+      if (t.isJSXExpressionContainer(item.value)) {
+        if (t.isObjectExpression(item.value.expression)) {
+          value = item.value.expression;
+        } else {
+          value = item.value.expression.value;
+        }
+      } else {
+        value = item.value.value;
+      }
 
       if (name === "class" || name === "className") {
         obj.className = value;
@@ -60,8 +70,10 @@ export function getAttributes(
           obj.events = {};
         }
         obj.events[name] = item.value.expression;
-      } else if (!isComponent && name === "key") {
+      } else if (name === "key") {
         obj.key = value;
+      } else if (name === "style") {
+        obj.style = value;
       } else {
         if (obj.props === null) {
           obj.props = {};
@@ -77,6 +89,7 @@ export function getAttributes(
       events: null,
       props: null,
       className: null,
+      style: null,
     },
   );
 }
