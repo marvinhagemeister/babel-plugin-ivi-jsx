@@ -53,7 +53,7 @@ Since `babel-plugin-ivi-jsx` is not required explicitely in your code your
 editor will not load the types automatically. This is solved by simply adding
 `jsx.d.ts` to your `tsconfig.json` to have a fully typed programming experience.
 
-```json
+```js
 {
   "compilerOptions": {...},
   "files": [
