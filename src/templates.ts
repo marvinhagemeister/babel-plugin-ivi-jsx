@@ -1,25 +1,23 @@
-import * as t from "babel-types";
+export type FileImports = Map<number, Map<string, string[]>>;
 
-export function wildCardImport(
-  name: string,
-  from: string,
-): t.ImportDeclaration {
-  return t.importDeclaration(
-    [t.importNamespaceSpecifier(t.identifier(name))],
-    t.stringLiteral(from),
-  );
-}
+export function addImport(
+  file: number,
+  source: string,
+  imported: string[],
+  fileImports: FileImports,
+) {
+  if (!fileImports.has(file)) {
+    fileImports.set(file, new Map());
+  }
 
-export function defaultImport(name: string, from: string): t.ImportDeclaration {
-  return t.importDeclaration(
-    [t.importDefaultSpecifier(t.identifier(name))],
-    t.stringLiteral(from),
-  );
-}
+  const imports = fileImports.get(file) as Map<string, string[]>;
 
-export function buildImport(ids: string[], from: string): t.ImportDeclaration {
-  return t.importDeclaration(
-    ids.map(id => t.importSpecifier(t.identifier(id), t.identifier(id))),
-    t.stringLiteral(from),
-  );
+  if (!imports.has(source)) {
+    imports.set(source, imported);
+  } else {
+    const parts = imports.get(source) as string[];
+    imports.set(source, [...new Set([...parts, ...imported])]);
+  }
+
+  return fileImports;
 }

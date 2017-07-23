@@ -1,8 +1,8 @@
-import * as h from "ivi-html";
+import { div, h1 } from "ivi-html";
 function Bar() {
-  return h.h1().children("Hello World");
+  return h1().children("Hello World");
 }
 
 function Foo() {
-  return h.div().children(Bar());
+  return div().children(Bar());
 }

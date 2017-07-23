@@ -37,12 +37,12 @@ function Foo(props) {
 is compiled to:
 
 ```js
-import * as h from "ivi-html";
+import { div, h1 } from "ivi-html";
 
 function Foo(props) {
-  return h.div().children(
-      h.h1().children(props.text),
-      h.div("content").children(props.children)
+  return div().children(
+      h1().children(props.text),
+      div("content").children(props.children)
   );
 }
 ```

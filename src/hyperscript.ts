@@ -1,94 +1,122 @@
-import { NodePath } from "babel-traverse";
+import { NodePath, Visitor } from "babel-traverse";
 import * as t from "babel-types";
-import {
-  Options,
-  isComponentCall,
-  getAttributes,
-  getProgram,
-  addImport,
-} from "./utils";
-import { buildImport, wildCardImport } from "./templates";
+import { Options, isComponentCall, getAttributes } from "./utils";
+import { addImport } from "./templates";
 import { objToAst, toAst } from "./convert";
 import { isPrimitiveProp } from "./optimizations";
+import { parseTagName } from "./parser";
 
 /* tslint:disable:no-var-requires */
 const jsx = require("babel-plugin-syntax-jsx");
 
-export default function convert(babel: any) {
-  return {
-    visitor,
-    inherits: jsx,
-  };
-}
-
 export interface State {
+  path: NodePath<t.Program>;
   opts: Options;
 }
 
-export const visitor = {
-  JSXElement(path: NodePath<t.JSXElement>, state: State) {
-    const opts = state.opts;
-    if (!opts._pragmaIncluded && !path.scope.hasBinding("h")) {
-      opts._pragmaIncluded = true;
+export interface PluginObj {
+  pre?: (state: State) => void;
+  visitor: Visitor;
+  post?: (state: State) => void;
+  inherits: any;
+}
 
-      const program = getProgram(path);
-      addImport(program.node, wildCardImport("h", "ivi-html"));
-    }
+export default function convert(): PluginObj {
+  /**
+   * Because the current file is always "unkown", we use a custom counter to
+   * identify a file. The structure is: `File -> import path -> imported`.
+   *
+   * An Example:
+   * ```
+   * Map(0, Map("ivi-html", ["h1, div"])
+   * ```
+   */
+  const fileImports = new Map<number, Map<string, string[]>>();
+  let id: number = 0;
 
-    const open = path.node.openingElement;
-    const attrs = getAttributes(open.attributes);
+  return {
+    visitor: {
+      Program(path, state: State) {
+        state.opts._fileId = id++;
+      },
+      JSXElement(path: NodePath<t.JSXElement>, state: State) {
+        const open = path.node.openingElement;
+        const name = parseTagName(open);
+        const isComponent = isComponentCall(open);
+        const attrs = getAttributes(open.attributes);
 
-    // Add event import
-    if (attrs.events !== null) {
-      const program = getProgram(path);
-      addImport(
-        program.node,
-        buildImport(Object.keys(attrs.events), "ivi-events"),
-      );
-    }
+        if (!isComponent) {
+          addImport(
+            state.opts._fileId as number,
+            "ivi-html",
+            [name],
+            fileImports,
+          );
 
-    // Children
-    const children = t.react.buildChildren(path.node) as any;
+          // Add event import
+          if (attrs.events !== null) {
+            addImport(
+              state.opts._fileId as number,
+              "ivi-events",
+              Object.keys(attrs.events),
+              fileImports,
+            );
+          }
+        }
 
-    open.name = open.name;
-    let name: string = "";
-    if (t.isJSXIdentifier(open.name)) {
-      name = open.name.name;
-    } else if (t.isJSXMemberExpression(open.name)) {
-      if (t.isJSXIdentifier(open.name.object)) {
-        name = open.name.object.name + "." + open.name.property.name;
-      } else {
-        throw new Error(
-          "Unsupported node: " + JSON.stringify(open.name, null, 2),
+        // Children
+        const children = t.react.buildChildren(path.node) as any;
+
+        const binding = path.scope.getBinding(name);
+
+        const result = !isComponent
+          ? hyperscript(
+              name,
+              attrs.className,
+              attrs.key,
+              attrs.props,
+              attrs.style,
+              attrs.events,
+              attrs.value,
+              attrs.checked,
+              attrs.unsafeHTML,
+              children,
+            )
+          : hyperscriptComponent(name, attrs.props, children, binding);
+
+        path.replaceWith(result);
+      },
+      JSXText(path: NodePath<t.JSXText>) {
+        const text =
+          path.node === null
+            ? t.nullLiteral()
+            : t.stringLiteral(path.node.value);
+        path.replaceWith(text);
+      },
+    },
+    pre(state) {
+      state.opts._fileId = id;
+    },
+    post(state) {
+      const counter = state.opts._fileId as number;
+      const path = state.path;
+
+      // Render imports
+      const file = fileImports.get(counter) as Map<string, string[]>;
+      file.forEach((values, key) => {
+        path.node.body.unshift(
+          t.importDeclaration(
+            values
+              .sort()
+              .map(v => t.importSpecifier(t.identifier(v), t.identifier(v))),
+            t.stringLiteral(key),
+          ),
         );
-      }
-    }
-
-    const binding = path.scope.getBinding(name);
-
-    const result = !isComponentCall(open)
-      ? hyperscript(
-          name,
-          attrs.className,
-          attrs.key,
-          attrs.props,
-          attrs.style,
-          attrs.events,
-          attrs.value,
-          attrs.checked,
-          attrs.unsafeHTML,
-          children,
-        )
-      : hyperscriptComponent(name, attrs.props, children, binding);
-
-    path.replaceWith(result);
-  },
-  JSXText(path: NodePath<t.JSXText>) {
-    const text =
-      path.node === null ? t.nullLiteral() : t.stringLiteral(path.node.value);
-    path.replaceWith(text);
-  },
-};
+      });
+    },
+    inherits: jsx,
+  };
+}
 
 export function hyperscript(
   tag: string,
@@ -103,7 +131,7 @@ export function hyperscript(
   children: null | any,
 ) {
   let ast = t.callExpression(
-    t.memberExpression(t.identifier("h"), t.identifier(tag)),
+    t.identifier(tag),
     className !== null ? [t.stringLiteral(className)] : [],
   );
 

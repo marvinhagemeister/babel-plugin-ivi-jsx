@@ -1,3 +1,9 @@
+import * as h from "ivi-html";
+
+export function Foo() {
+  return h.div().children("Hello World");
+}
+
 export function Text() {
   return (
     <div>
@@ -9,9 +15,5 @@ export function Text() {
 }
 
 export function Heading(props) {
-  return (
-    <h1>
-      {props.text} - {props.children}
-    </h1>
-  );
+  return h.h1().children(props.text + " - " + props.children);
 }
