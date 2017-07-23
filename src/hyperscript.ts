@@ -1,4 +1,5 @@
 import * as t from "babel-types";
+import { Binding } from "babel-traverse";
 import { Attributes } from "./utils";
 import { objToAst, toAst } from "./convert";
 import { isPrimitiveProp } from "./optimizations";
@@ -94,8 +95,11 @@ export function hyperscriptComponent(
   name: string,
   props: any,
   children: any,
-  binding: any,
-  options: { primitiveProp: boolean } = { primitiveProp: false },
+  binding: Binding,
+  options: { primitiveProp: boolean; isClass: boolean } = {
+    primitiveProp: false,
+    isClass: false,
+  },
 ) {
   const childAst =
     children !== null && children.length === 1 ? children[0] : children;
@@ -124,8 +128,9 @@ export function hyperscriptComponent(
     }
   }
 
-  return t.callExpression(
-    t.identifier(name),
-    propExp !== null ? [propExp] : [],
-  );
+  const args = propExp !== null ? [propExp] : [];
+
+  return options.isClass
+    ? t.newExpression(t.identifier(name), args)
+    : t.callExpression(t.identifier(name), args);
 }

@@ -1,8 +1,11 @@
 import { NodePath, Visitor } from "babel-traverse";
+import { dirname, join, extname } from "path";
 import * as t from "babel-types";
 import { Options, isComponentCall, getAttributes, parseTagName } from "./utils";
 import { hyperscript, hyperscriptComponent } from "./hyperscript";
 import { addImport } from "./templates";
+import importPlugin from "./importVisitor";
+import { transformFileSync } from "babel-core";
 
 /* tslint:disable:no-var-requires */
 const jsx = require("babel-plugin-syntax-jsx");
@@ -49,12 +52,49 @@ export default function plugin(): PluginObj<PluginState> {
           }
         }
 
+        // Check if is class component
+        // TODO: Update typings, may return undefined.
+        const binding = path.scope.getBinding(name);
+
+        let isClass: boolean = false;
+        if (isComponent && binding !== undefined) {
+          const iNode = binding.path.findParent(node =>
+            t.isImportDeclaration(node),
+          ) as NodePath<t.ImportDeclaration> | null;
+          if (iNode !== null) {
+            const source = (this as any).file.opts.filename;
+
+            // TODO: Refactor this to be more performant and less brittle.
+            if (source !== undefined && source !== "unknown") {
+              const file = iNode.node.source.value;
+
+              // We simply assume that both files share the same extension
+              const sourceFile = join(dirname(source), file + extname(source));
+
+              const cache: Record<string, boolean> = {
+                [name]: false,
+              };
+              transformFileSync(sourceFile, {
+                plugins: [importPlugin(cache)],
+              });
+              isClass = cache[name];
+            } else {
+              throw new Error(
+                `Could not detect source file of which "${name}" is imported.`,
+              );
+            }
+          }
+        }
+
         // Children
         const children = t.react.buildChildren(path.node) as any;
-        const binding = path.scope.getBinding(name);
+
         const result = !isComponent
           ? hyperscript(name, attrs, children)
-          : hyperscriptComponent(name, attrs.props, children, binding);
+          : hyperscriptComponent(name, attrs.props, children, binding, {
+              primitiveProp: false,
+              isClass,
+            });
 
         path.replaceWith(result);
       },
