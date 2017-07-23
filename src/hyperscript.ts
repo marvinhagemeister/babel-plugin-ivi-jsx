@@ -180,28 +180,35 @@ export function hyperscriptComponent(
   binding: any,
   options: { primitiveProp: boolean } = { primitiveProp: false },
 ) {
+  const childAst =
+    children !== null && children.length === 1 ? children[0] : children;
+
   let propExp:
+    | null
     | t.ObjectExpression
     | t.StringLiteral
     | t.NumericLiteral
     | t.NullLiteral
-    | t.ArrayExpression = objToAst(props);
+    | t.ArrayExpression = null;
 
-  const childAst =
-    children !== null && children.length === 1 ? children[0] : children;
-
-  const keys = Object.keys(props);
-  if (
-    options.primitiveProp &&
-    keys.length === 1 &&
-    isPrimitiveProp(binding, keys[0])
-  ) {
-    propExp = toAst(props[keys[0]]);
-  } else if (children !== null && children.length > 0) {
-    propExp.properties.push(
-      t.objectProperty(t.identifier("children"), childAst),
-    );
+  if (props !== null) {
+    propExp = objToAst(props);
+    const keys = Object.keys(props);
+    if (
+      options.primitiveProp &&
+      keys.length === 1 &&
+      isPrimitiveProp(binding, keys[0])
+    ) {
+      propExp = toAst(props[keys[0]]);
+    } else if (children !== null && children.length > 0) {
+      propExp.properties.push(
+        t.objectProperty(t.identifier("children"), childAst),
+      );
+    }
   }
 
-  return t.callExpression(t.identifier(name), [propExp]);
+  return t.callExpression(
+    t.identifier(name),
+    propExp !== null ? [propExp] : [],
+  );
 }
