@@ -1,0 +1,7 @@
+import { div } from "ivi-html";
+import Counter from "./Counter";
+import Simple from "./Simple";
+
+export default function Foo() {
+  return div().children(new Counter(), Simple());
+}
