@@ -1,15 +1,11 @@
 import * as t from "babel-types";
-import { NodePath } from "babel-traverse";
 
 export function isComponentCall(node: t.JSXOpeningElement): boolean {
   let name = "";
   if (t.isJSXIdentifier(node.name)) {
     name = node.name.name;
-  } else if (t.isJSXMemberExpression(node.name)) {
-    if (
-      t.isJSXIdentifier(node.name.object) &&
-      t.isJSXIdentifier(node.name.property)
-    ) {
+  } else {
+    if (t.isJSXIdentifier(node.name.object)) {
       name = node.name.object.name + "." + node.name.property.name;
     } else {
       throw new Error("Unknown node: " + JSON.stringify(node.name, null, 2));
@@ -21,19 +17,7 @@ export function isComponentCall(node: t.JSXOpeningElement): boolean {
 
 export interface Options {
   primitiveProps: boolean;
-  _pragmaIncluded: boolean;
-}
-
-export function getProgram<T>(path: NodePath<T>): NodePath<t.Program> {
-  return path.findParent(p => p.isProgram()) as any;
-}
-
-export function addImport(node: t.Program, importExp: t.ImportDeclaration) {
-  if (node.body === undefined) {
-    node.body = [];
-  }
-
-  return node.body.unshift(importExp);
+  _fileId?: number;
 }
 
 export interface Attributes {

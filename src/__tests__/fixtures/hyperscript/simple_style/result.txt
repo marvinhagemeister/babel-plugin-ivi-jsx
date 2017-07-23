@@ -1,4 +1,4 @@
-import * as h from "ivi-html";
+import { div } from "ivi-html";
 function FooBar() {
-  return h.div().style({ backgroundPosition: "auto auto" }).children("Hello World");
+  return div().style({ backgroundPosition: "auto auto" }).children("Hello World");
 }

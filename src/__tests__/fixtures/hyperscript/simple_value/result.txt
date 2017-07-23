@@ -1,4 +1,4 @@
-import * as h from "ivi-html";
+import { input } from "ivi-html";
 function FooBar() {
-  return h.input().value("foo");
+  return input().value("foo");
 }
