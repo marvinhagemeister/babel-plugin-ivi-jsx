@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.5
+
+- Fix error when component has no props
+
 ## 1.0.4
 
 - Refactor jsx typings
