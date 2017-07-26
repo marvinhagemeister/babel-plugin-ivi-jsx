@@ -1,17 +1,10 @@
-export type FileImports = Map<number, Map<string, string[]>>;
+export type FileImports = Map<string, string[]>;
 
 export function addImport(
-  file: number,
   source: string,
   imported: string[],
-  fileImports: FileImports,
+  imports: FileImports,
 ) {
-  if (!fileImports.has(file)) {
-    fileImports.set(file, new Map());
-  }
-
-  const imports = fileImports.get(file) as Map<string, string[]>;
-
   if (!imports.has(source)) {
     imports.set(source, imported);
   } else {
@@ -19,5 +12,5 @@ export function addImport(
     imports.set(source, [...new Set([...parts, ...imported])]);
   }
 
-  return fileImports;
+  return imports;
 }
