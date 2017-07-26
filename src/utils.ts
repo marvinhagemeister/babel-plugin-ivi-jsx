@@ -114,3 +114,19 @@ export function getAttributes(
 export function camelCaseEvent(name: string): string {
   return "on" + name.slice(2, 3).toUpperCase() + name.slice(3);
 }
+
+export function parseTagName(open: t.JSXOpeningElement) {
+  let name: string = "";
+  if (t.isJSXIdentifier(open.name)) {
+    name = open.name.name;
+  } else if (t.isJSXMemberExpression(open.name)) {
+    if (t.isJSXIdentifier(open.name.object)) {
+      name = open.name.object.name + "." + open.name.property.name;
+    } else {
+      throw new Error(
+        "Unsupported node: " + JSON.stringify(open.name, null, 2),
+      );
+    }
+  }
+  return name;
+}

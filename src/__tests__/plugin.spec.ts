@@ -1,4 +1,4 @@
-import plugin from "../hyperscript";
+import plugin from "../plugin";
 import { run } from "./helpers";
 
 describe("Replace JSX with VNodes", () => {
