@@ -1,1 +1,1 @@
-export { default } from "./hyperscript";
+export { default } from "./plugin";
