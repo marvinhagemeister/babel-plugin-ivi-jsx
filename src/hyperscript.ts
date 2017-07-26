@@ -1,6 +1,6 @@
 import { NodePath, Visitor } from "babel-traverse";
 import * as t from "babel-types";
-import { Options, isComponentCall, getAttributes } from "./utils";
+import { Attributes, Options, isComponentCall, getAttributes } from "./utils";
 import { addImport } from "./templates";
 import { objToAst, toAst } from "./convert";
 import { isPrimitiveProp } from "./optimizations";
@@ -14,79 +14,53 @@ export interface State {
   opts: Options;
 }
 
-export interface PluginObj {
-  pre?: (state: State) => void;
-  visitor: Visitor;
-  post?: (state: State) => void;
+export interface Visitor2<S = {}> extends Visitor {
+  JSXElement(this: S, path: NodePath<t.JSXElement>): void;
+  JSXText(this: S, path: NodePath<t.JSXText>): void;
+}
+
+export interface PluginObj<S = {}> extends Record<string, any> {
+  pre?: (this: S, state: State) => void;
+  visitor: Visitor2<S>;
+  post?: (this: S, state: State) => void;
   inherits: any;
 }
 
-export default function convert(): PluginObj {
-  /**
-   * Because the current file is always "unkown", we use a custom counter to
-   * identify a file. The structure is: `File -> import path -> imported`.
-   *
-   * An Example:
-   * ```
-   * Map(0, Map("ivi-html", ["h1, div"])
-   * ```
-   */
-  const fileImports = new Map<number, Map<string, string[]>>();
-  let id: number = 0;
+export interface PluginState {
+  imports: Map<string, string[]>;
+}
 
+export default function convert(): PluginObj<PluginState> {
   return {
+    pre() {
+      this.imports = new Map();
+    },
     visitor: {
-      Program(path, state: State) {
-        state.opts._fileId = id++;
-      },
-      JSXElement(path: NodePath<t.JSXElement>, state: State) {
+      JSXElement(path) {
         const open = path.node.openingElement;
         const name = parseTagName(open);
         const isComponent = isComponentCall(open);
         const attrs = getAttributes(open.attributes);
 
         if (!isComponent) {
-          addImport(
-            state.opts._fileId as number,
-            "ivi-html",
-            [name],
-            fileImports,
-          );
+          addImport("ivi-html", [name], this.imports);
 
           // Add event import
           if (attrs.events !== null) {
-            addImport(
-              state.opts._fileId as number,
-              "ivi-events",
-              Object.keys(attrs.events),
-              fileImports,
-            );
+            addImport("ivi-events", Object.keys(attrs.events), this.imports);
           }
         }
 
         // Children
         const children = t.react.buildChildren(path.node) as any;
-
         const binding = path.scope.getBinding(name);
-
         const result = !isComponent
-          ? hyperscript(
-              name,
-              attrs.className,
-              attrs.key,
-              attrs.props,
-              attrs.style,
-              attrs.events,
-              attrs.value,
-              attrs.checked,
-              attrs.unsafeHTML,
-              children,
-            )
+          ? hyperscript(name, attrs, children)
           : hyperscriptComponent(name, attrs.props, children, binding);
 
         path.replaceWith(result);
       },
-      JSXText(path: NodePath<t.JSXText>) {
+      JSXText(path) {
         const text =
           path.node === null
             ? t.nullLiteral()
@@ -94,16 +68,11 @@ export default function convert(): PluginObj {
         path.replaceWith(text);
       },
     },
-    pre(state) {
-      state.opts._fileId = id;
-    },
     post(state) {
-      const counter = state.opts._fileId as number;
       const path = state.path;
 
       // Render imports
-      const file = fileImports.get(counter) as Map<string, string[]>;
-      file.forEach((values, key) => {
+      this.imports.forEach((values, key) => {
         path.node.body.unshift(
           t.importDeclaration(
             values
@@ -120,16 +89,20 @@ export default function convert(): PluginObj {
 
 export function hyperscript(
   tag: string,
-  className: string | null,
-  key: null | string,
-  props: null | Record<string, any>,
-  style: null | t.ObjectExpression,
-  events: null | Record<string, any>,
-  value: null | t.StringLiteral | t.NumericLiteral,
-  checked: null | boolean,
-  unsafeHTML: null | string,
+  attrs: Attributes,
   children: null | any,
 ) {
+  const {
+    className,
+    key,
+    props,
+    style,
+    value,
+    checked,
+    unsafeHTML,
+    events,
+  } = attrs;
+
   let ast = t.callExpression(
     t.identifier(tag),
     className !== null ? [t.stringLiteral(className)] : [],

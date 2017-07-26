@@ -22,7 +22,7 @@ export interface Options {
 
 export interface Attributes {
   key: null | string;
-  events: null | Record<string, (ev: any) => void>;
+  events: null | Record<string, any>;
   props: null | Record<string, any>;
   className: null | string;
   style: null | t.ObjectExpression;
@@ -33,7 +33,6 @@ export interface Attributes {
 
 export function getAttributes(
   attrs: any[] | null,
-  /* tslint:disable:next-line no-shadowed-variable */
   isComponent: boolean = false,
 ): Attributes {
   if (attrs === null) {
