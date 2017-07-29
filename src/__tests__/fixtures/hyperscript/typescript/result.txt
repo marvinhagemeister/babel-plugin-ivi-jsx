@@ -1,0 +1,9 @@
+import { div, p } from "ivi-html";
+import Heading from "./Heading";
+
+export function Text() {
+  return div().children(Heading({
+    text: "foo",
+    children: "Hello World"
+  }), p().children("Lorem Ipsum"), div().children("The End"));
+}

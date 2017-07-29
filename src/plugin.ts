@@ -1,5 +1,7 @@
 import { NodePath, Visitor } from "babel-traverse";
 import { dirname, join, extname } from "path";
+import * as ts from "typescript";
+import * as fs from "fs";
 import * as t from "babel-types";
 import { Options, isComponentCall, getAttributes, parseTagName } from "./utils";
 import { hyperscript, hyperscriptComponent } from "./hyperscript";
@@ -69,11 +71,41 @@ export default function plugin(): PluginObj<PluginState> {
               const file = iNode.node.source.value;
 
               // We simply assume that both files share the same extension
-              const sourceFile = join(dirname(source), file + extname(source));
 
               const cache: Record<string, boolean> = {
                 [name]: false,
               };
+
+              const files = fs.readdirSync(dirname(source));
+              const res2 = files.find(
+                item =>
+                  item.startsWith(join(file)) &&
+                  (item.endsWith("js") ||
+                    item.endsWith("jsx") ||
+                    item.endsWith("ts") ||
+                    item.endsWith("tsx")),
+              );
+
+              const sourceFile = join(
+                dirname(source),
+                res2 === undefined ? file + extname(source) : res2,
+              );
+
+              let content = fs.readFileSync(sourceFile, "utf-8");
+
+              // TypeScript support
+              if (sourceFile.endsWith(".ts") || sourceFile.endsWith(".tsx")) {
+                const compilerOptions = require(join(process.cwd(), "tsconfig"))
+                  .compilerOptions;
+
+                const res1 = ts.transpileModule(content, {
+                  compilerOptions,
+                  moduleName: "myModule2",
+                });
+
+                content = res1.outputText;
+              }
+
               transformFileSync(sourceFile, {
                 plugins: [importPlugin(cache)],
               });

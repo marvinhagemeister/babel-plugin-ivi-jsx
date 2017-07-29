@@ -37,7 +37,8 @@
     "babel-plugin-syntax-jsx": "^6.18.0",
     "babel-traverse": "^6.25.0",
     "babel-types": "^6.25.0",
-    "babylon": "^6.17.4"
+    "babylon": "^6.17.4",
+    "typescript": "^2.4.2"
   },
   "devDependencies": {
     "@types/babel-core": "^6.7.15",
@@ -59,8 +60,7 @@
     "rimraf": "^2.6.1",
     "ts-node": "^3.2.1",
     "tslint": "^5.5.0",
-    "tslint-config-sevenval": "^0.6.3",
-    "typescript": "^2.4.2"
+    "tslint-config-sevenval": "^0.6.3"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
