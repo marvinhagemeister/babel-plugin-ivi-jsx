@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0
+
+- Add support fur stateless components (class components)
+- Only import helpers that are actually used
+
 ## 1.0.5
 
 - Fix error when component has no props
